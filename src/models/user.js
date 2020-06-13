@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema({
     email : {
      type: String,
      required: true,
-     trim: true,
+     unique: true, //so that an email id can be used only once to create an account
+     trim: true, //remove spaces
      lowercase: true,
      validate(value) {
          if(!validator.isEmail(value))
@@ -44,6 +45,26 @@ const userSchema = new mongoose.Schema({
     } 
  });
 
+ //To find the user when he logs in
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({ email });
+
+    if(!user)
+    {
+        throw new Error("Unable to login!");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if(!isMatch)
+    {
+        throw new Error("Unable to login!");
+    }
+
+    return user;
+};
+
+//Hash the plain text password before saving
 userSchema.pre("save", async function(next) {
     const user = this;
 
@@ -51,8 +72,8 @@ userSchema.pre("save", async function(next) {
     {
         user.password = await bcrypt.hash(user.password, 8)
     } 
-
-    next(); //always call next() at the end of the function so that the function execution ends and doesn't hang
+    //always call next() at the end of the function so that the function execution ends and doesn't hang
+    next(); 
 });
 
 const User = mongoose.model("User", userSchema);
