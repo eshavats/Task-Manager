@@ -1,18 +1,14 @@
 const express = require("express");
 const User = require ("../models/user");
+const auth = require("../middleware/auth");
 const router = new express.Router();
 
-router.get("/users", async (req, res) => {
-
-    try {
-        const users = await User.find({});
-        res.send(users);
-    } catch(e) {
-        res.status(500).send(e);
-    }
-
+//View our profile
+router.get("/users/me", auth, async (req, res) => {
+    res.send(req.user);
 });
 
+//Search for users
 router.get("/users/:id", async (req, res) => {
     const _id = req.params.id;
 
@@ -29,6 +25,7 @@ router.get("/users/:id", async (req, res) => {
 
 });
 
+//Register
 router.post("/users", async (req, res) => {
 
     const user = new User(req.body);
@@ -43,6 +40,7 @@ router.post("/users", async (req, res) => {
 
 });
 
+//Login
 router.post("/users/login", async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password);
@@ -53,6 +51,7 @@ router.post("/users/login", async (req, res) => {
     }
 });
 
+//Update user
 router.patch("/users/:id", async (req, res) => {
 
     const updates = Object.keys(req.body);
@@ -80,6 +79,7 @@ router.patch("/users/:id", async (req, res) => {
     }
 });
 
+//Delete user
 router.delete("/users/:id", async (req, res) => {
     
     try {
