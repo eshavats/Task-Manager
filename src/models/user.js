@@ -52,6 +52,17 @@ const userSchema = new mongoose.Schema({
     }] 
  });
 
+ //When a Mongoose document is passed to res.send, Mongoose converts the object into JSON. toJSON is called instantly after res.send
+ userSchema.methods.toJSON = function() {
+     const user = this;
+     const userObject = user.toObject();
+
+     delete userObject.password;
+     delete userObject.tokens;
+
+     return userObject;
+ };
+
  userSchema.methods.generateAuthToken = async function() {
      const user = this;
      const token = await jwt.sign({ _id: user._id.toString() }, "thisismyapp");
@@ -60,7 +71,7 @@ const userSchema = new mongoose.Schema({
      await user.save();
 
      return token;
- }
+ };
 
  //To find the user when he logs in
 userSchema.statics.findByCredentials = async (email, password) => {
@@ -78,7 +89,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
         throw new Error("Unable to login!");
     }
 
-    return user;
+    return user;    
 };
 
 //Hash the plain text password before saving
