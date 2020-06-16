@@ -52,6 +52,12 @@ const userSchema = new mongoose.Schema({
     }] 
  });
 
+ userSchema.virtual("tasks", {
+    ref: "Task",
+    localField: "_id",
+    foreignField: "owner"
+ });
+
  //When a Mongoose document is passed to res.send, Mongoose converts the object into JSON. toJSON is called instantly after res.send
  userSchema.methods.toJSON = function() {
      const user = this;
