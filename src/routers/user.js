@@ -8,23 +8,6 @@ router.get("/users/me", auth, async (req, res) => {
     res.send(req.user);
 });
 
-//Search for users
-// router.get("/users/:id", async (req, res) => {
-//     const _id = req.params.id;
-
-//     try {
-//         const user = await User.findById(_id);
-//         if(!user)
-//         {
-//             return res.status(404).send("No users found!");
-//         }
-//         res.send(user);
-//     } catch(e) {
-//         res.status(500).send(e);
-//     }
-
-// });
-
 //Register
 router.post("/users", async (req, res) => {
 
