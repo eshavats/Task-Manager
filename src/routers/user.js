@@ -1,7 +1,8 @@
 const express = require("express");
+const multer = require("multer");
 const User = require ("../models/user");
 const auth = require("../middleware/auth");
-const router = new express.Router();
+const router = new express.Router(); 
 
 //View our profile
 router.get("/users/me", auth, async (req, res) => {
@@ -90,6 +91,39 @@ router.delete("/users/me", auth, async (req, res) => {
         res.status(500).send(e);
     }
 
+});
+
+const upload = multer({
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(req, file, cb) {
+        if(!file.originalname.match(/\.(png|jpg|jpeg)$/))
+        {
+            return cb(new Error("Please upload an image of jpg/jpeg/png format"));
+        }
+        cb(undefined, true);
+    }
+});
+
+//Upload avatar 
+router.post("/users/me/avatar", auth, upload.single("avatar"), async (req, res) => {
+    req.user.avatar = req.file.buffer;
+    await req.user.save();
+    res.send("Profile avatar added successfully!");
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+});
+
+//Delete avatar
+router.delete("/users/me/avatar", auth, async (req, res) => {
+    try {
+        req.user.avatar = undefined;
+        await req.user.save();
+        res.send("Profile avatar deleted successfully!");
+    } catch(e) {
+        res.status(400).send(e);
+    }
 });
 
 module.exports = router;
